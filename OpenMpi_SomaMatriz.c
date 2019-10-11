@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h> 
 #include <math.h>
-#define n  2//dimensao da matriz
+#define n  3//dimensao da matriz
 
 int main (int argc, char *argv[]) {
     int rank; int num_procs; int source, target; MPI_Status status;
@@ -14,25 +14,30 @@ int main (int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);   
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     //int n = 2;//dimensao da matriz
-    int m1[n][n] = {{1,2},{3,4}};
-    int m2[n][n] = {{1,2},{3,4}};
+    int m1[n][n] = {{1,2,4},{3,4,4},{3,4,4}};
+    int m2[n][n] = {{1,2,6},{3,4,6},{3,4,4}};
     int m3[n][n];
     int a = 1;
 // 4-> 1 -> [0][0] 2 ->[0][1] 3->[1][0] 4->[1][1]
     if (rank != 0) {
         a=2;
-       
+         
+       int *mat1 = &m1[0][0];
+       int *mat2 = &m2[0][0];
+         
         //sprintf(msg, "Processo #%d em execucao!", rank);
-        int x = (rank-1)%n;
-        int y = ceil((rank-1)/n);
+      //  int x = (rank-1)%n;
+      //  int y = ceil((rank-1)/n);
         printf("%d - rank \n", rank);
-        printf("Operacao: %d + %d \n",m1[x][y], m2[x][y]);
-        msg[0]  = m1[x][y] + m2[x][y];
+        //printf("Operacao: %d + %d \n",m1[x][y], m2[x][y]);
+        msg[0]  = (* (mat1 + rank-1)) + (* (mat2 + rank-1));
         target = 0; 
 
         MPI_Send(msg, 1, MPI_INT, target, tag, MPI_COMM_WORLD);
     } else {
       
+
+        
         int x;
         int y;
         for (source = 1; source < num_procs; source++) {
@@ -51,7 +56,7 @@ int main (int argc, char *argv[]) {
             printf("\n");
         }
 
-        printf("a %d", a);
+      //  printf("a %d", (*(&m1 + 3)));
 
     }
     
